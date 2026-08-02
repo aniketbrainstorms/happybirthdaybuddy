@@ -195,7 +195,7 @@
     dot: c => `<svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="3.2" fill="${c}"/></svg>`
   };
 
-  const DOODLE_TYPES = Object.keys(DOODLE_SVGS);
+  const DOODLE_TYPES = [...Object.keys(DOODLE_SVGS), 'heartEmoji', 'heartEmoji', 'sunflower', 'sunflower'];
 
   /* ---------------------------------------------------------
      6. createDoodles()
@@ -222,7 +222,12 @@
       d.style.top = `calc(50% + ${Math.sin(angle) * dist}% - ${size/2}px)`;
       d.style.zIndex = zIndex;
       d.style.transform = `rotate(${randRange(-20, 20)}deg)`;
-      d.innerHTML = DOODLE_SVGS[type](color);
+      if (type === 'heartEmoji' || type === 'sunflower'){
+        const emoji = type === 'heartEmoji' ? '💗' : '🌻';
+        d.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:${size}px;line-height:1;">${emoji}</div>`;
+      } else {
+        d.innerHTML = DOODLE_SVGS[type](color);
+      }
       frag.appendChild(d);
     }
     return frag;
@@ -472,3 +477,29 @@
 
   init();
 })();
+function animateBirthdayText(){
+  const textEl = document.getElementById('bdayText');
+  if (!textEl) return;
+  const words = textEl.textContent.split(' ');
+  textEl.textContent = '';
+  let i = 0;
+  words.forEach((word, wi) => {
+    word.split('').forEach(ch => {
+      const span = document.createElement('span');
+      span.className = 'letter';
+      span.textContent = ch;
+      span.style.setProperty('--d', (i * 40) + 'ms');
+      textEl.appendChild(span);
+      setTimeout(() => span.classList.add('wave'), i * 40 + 550);
+      i++;
+    });
+    if (wi < words.length - 1){
+      const space = document.createElement('span');
+      space.className = 'letter space';
+      space.textContent = '\u00A0';
+      textEl.appendChild(space);
+      i++;
+    }
+  });
+}
+animateBirthdayText();
