@@ -203,13 +203,14 @@
      around a sticker without landing on top of it.
   --------------------------------------------------------- */
   function createDoodles(sticker, zIndex){
-    const count = isCoarsePointer ? Math.floor(randRange(2, 4)) : Math.floor(randRange(3, 6));
-    const frag = document.createDocumentFragment();
+  const count = isCoarsePointer ? Math.floor(randRange(2, 4)) : Math.floor(randRange(3, 6));
+  const frag = document.createDocumentFragment();
+  const guaranteed = ['heartEmoji', 'sunflower']; // every photo gets one of each
 
-    for (let i = 0; i < count; i++){
-      const type = pick(DOODLE_TYPES);
-      const color = pick(DOODLE_COLORS);
-      const size = randRange(20, 40);
+  for (let i = 0; i < count; i++){
+    const type = i < guaranteed.length ? guaranteed[i] : pick(DOODLE_TYPES);
+    const color = pick(DOODLE_COLORS);
+    const size = (type === 'heartEmoji' || type === 'sunflower') ? randRange(24, 42) : randRange(20, 40);
 
       const angle = randRange(0, Math.PI * 2);
       const ringMin = 52, ringMax = 78; // percent radius from sticker center, in sticker-widths
@@ -342,13 +343,11 @@
     ];
 
     const paperSpots = [
-      { type: 'scrap', style: 'grid',  top: 4,  left: 34, w: 90, h: 70, rot: -10, z: 1 },
-      { type: 'scrap', style: 'lined', top: 60, left: 40, w: 80, h: 60, rot: 8,   z: 1 },
-      { type: 'scrap', style: 'torn',  top: 30, left: 4,  w: 70, h: 90, rot: 6,   z: 1 },
-      { type: 'stamp', top: 3,  left: 5,  w: 46, h: 56, rot: -9, z: 30 },
-      { type: 'note',  top: 88, left: 70, w: 76, h: 60, rot: 6,  z: 30, text: 'always' },
-      { type: 'note',  top: 6,  left: 88, w: 66, h: 54, rot: -8, z: 30, text: 'us ✿' }
-    ];
+     { type: 'scrap', style: 'grid',  top: 4,  left: 34, w: 90, h: 70, rot: -10, z: 1 },
+     { type: 'scrap', style: 'lined', top: 60, left: 40, w: 80, h: 60, rot: 8,   z: 1 },
+     { type: 'scrap', style: 'torn',  top: 30, left: 4,  w: 70, h: 90, rot: 6,   z: 1 },
+     { type: 'stamp', top: 3,  left: 5,  w: 46, h: 56, rot: -9, z: 30 }
+   ];
 
     return { tapeSpots, paperSpots };
   }
@@ -480,19 +479,23 @@
 function animateBirthdayText(){
   const textEl = document.getElementById('bdayText');
   if (!textEl) return;
-  const words = textEl.textContent.split(' ');
-  textEl.textContent = '';
-  let i = 0;
-  words.forEach((word, wi) => {
-    word.split('').forEach(ch => {
-      const span = document.createElement('span');
-      span.className = 'letter';
-      span.textContent = ch;
-      span.style.setProperty('--d', (i * 40) + 'ms');
-      textEl.appendChild(span);
-      setTimeout(() => span.classList.add('wave'), i * 40 + 550);
-      i++;
-    });
+  const words = textEl.textContent.trim().split(/\s+/);
+textEl.textContent = '';
+let i = 0;
+words.forEach(word => {
+  const line = document.createElement('div');
+  line.className = 'line';
+  word.split('').forEach(ch => {
+    const span = document.createElement('span');
+    span.className = 'letter';
+    span.textContent = ch;
+    span.style.setProperty('--d', (i * 40) + 'ms');
+    line.appendChild(span);
+    setTimeout(() => span.classList.add('wave'), i * 40 + 550);
+    i++;
+  });
+  textEl.appendChild(line);
+});
     if (wi < words.length - 1){
       const space = document.createElement('span');
       space.className = 'letter space';
