@@ -347,3 +347,35 @@ html, body{
     50%      { transform: translateY(-4px) rotate(calc(var(--base-rot,0deg) + 0.4deg)); }
   }
 }
+/* added */
+.title .letter{
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(14px) rotate(-6deg);
+  animation: letter-in .5s cubic-bezier(.22,1,.36,1) forwards;
+  animation-delay: var(--d, 0ms);
+}
+.title .letter.wave{
+  animation: letter-wave 2.6s ease-in-out infinite;
+  animation-delay: var(--d, 0ms);
+}
+@keyframes letter-in{ to{ opacity: 1; transform: translateY(0) rotate(0deg); } }
+@keyframes letter-wave{ 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-5px); } }
+/* added */
+.cake{ width: 110px; margin: 8px auto 4px; }
+.cake-svg{ width: 100%; height: auto; display: block; }
+
+.flame{
+  transform-origin: 50% 100%;
+  animation: flicker 1.4s ease-in-out infinite;
+  filter: drop-shadow(0 0 4px rgba(255,194,75,.7));
+}
+.flame.c2{ animation-duration: 1.7s; animation-delay: .15s; }
+.flame.c3{ animation-duration: 1.25s; animation-delay: .3s; }
+
+@keyframes flicker{
+  0%,100%{ transform: scale(1,1) rotate(0deg); opacity: 1; }
+  25%    { transform: scale(1.1,.92) rotate(-4deg); opacity: .9; }
+  50%    { transform: scale(.92,1.06) rotate(3deg); opacity: 1; }
+  75%    { transform: scale(1.06,.95) rotate(-3deg); opacity: .94; }
+}
