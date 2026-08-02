@@ -71,6 +71,13 @@ html, body{
   color: var(--doodle-coral);
   display: inline-block;
   transform: translateY(-2px) rotate(-8deg);
+  animation: heartbeat 2.6s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes heartbeat{
+  0%, 100% { transform: translateY(-2px) rotate(-8deg) scale(1); }
+  50%      { transform: translateY(-2px) rotate(-8deg) scale(1.14); }
 }
 
 .subtitle{
@@ -141,6 +148,8 @@ html, body{
   border-radius: 50%;
   filter: blur(18px);
   opacity: .35;
+  transition: transform .6s cubic-bezier(0.22,1,0.36,1);
+  will-change: transform;
 }
 
 .crease{
@@ -172,6 +181,8 @@ html, body{
   will-change: transform;
   transition: transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s ease;
   opacity: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .sticker img{
@@ -185,7 +196,8 @@ html, body{
 }
 
 .sticker:hover,
-.sticker:focus-visible{
+.sticker:focus-visible,
+.sticker.tap{
   box-shadow:
     0 0 0 4px var(--doodle-pink),
     var(--shadow-lift);
@@ -211,6 +223,7 @@ html, body{
 /* gentle ambient float once settled */
 .sticker.float{
   animation: float-y 6.5s ease-in-out infinite;
+  animation-play-state: var(--float-state, running);
 }
 @keyframes float-y{
   0%, 100% { transform: translateY(0) rotate(var(--base-rot,0deg)); }
@@ -218,7 +231,8 @@ html, body{
 }
 
 .sticker:hover.float,
-.sticker:focus-visible.float{
+.sticker:focus-visible.float,
+.sticker.tap.float{
   animation-play-state: paused;
   transform: translateY(-10px) scale(1.045) rotate(calc(var(--base-rot,0deg) + 2deg)) !important;
 }
@@ -232,7 +246,8 @@ html, body{
   transition: transform .4s ease;
 }
 
-.sticker:hover ~ .doodle{ transform: scale(1.08) rotate(6deg); }
+.sticker:hover ~ .doodle,
+.sticker.tap ~ .doodle{ transform: scale(1.08) rotate(6deg); }
 
 .doodle svg{ display:block; width:100%; height:100%; overflow: visible; }
 
@@ -319,4 +334,16 @@ html, body{
   .sticker{ padding: 6px; border-radius: 16px; }
   .sticker img{ border-radius: 11px; }
   .title{ font-size: 42px; }
+
+  /* cheaper to paint on lower-powered devices */
+  .blob{ filter: blur(10px); }
+  .collage::before{ opacity: .035; }
+
+  /* slower, smaller-amplitude float reads as calm instead of jittery
+     on small screens, and costs less battery */
+  .sticker.float{ animation-duration: 8.5s; }
+  @keyframes float-y{
+    0%, 100% { transform: translateY(0) rotate(var(--base-rot,0deg)); }
+    50%      { transform: translateY(-4px) rotate(calc(var(--base-rot,0deg) + 0.4deg)); }
+  }
 }
