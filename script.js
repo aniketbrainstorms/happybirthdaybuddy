@@ -10,6 +10,9 @@
 
   const collageEl = document.getElementById('collage');
 
+  const isCoarsePointer = matchMedia('(pointer: coarse)').matches;
+  const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   /* ---------------------------------------------------------
      1. ASSET MANIFEST
      Hand-tuned starting layout for each photo: position, size
@@ -200,7 +203,7 @@
      around a sticker without landing on top of it.
   --------------------------------------------------------- */
   function createDoodles(sticker, zIndex){
-    const count = Math.floor(randRange(3, 6));
+    const count = isCoarsePointer ? Math.floor(randRange(2, 4)) : Math.floor(randRange(3, 6));
     const frag = document.createDocumentFragment();
 
     for (let i = 0; i < count; i++){
@@ -242,8 +245,20 @@
     const img = document.createElement('img');
     img.src = item.src;
     img.alt = 'scrapbook photo';
-    img.loading = 'eager';
+    img.loading = item.order < 2 ? 'eager' : 'lazy';
+    img.decoding = 'async';
     wrap.appendChild(img);
+
+    // touch devices don't get :hover — fake it with a tap class so the
+    // lift + doodle wiggle still happens, then release after a beat
+    if (isCoarsePointer){
+      wrap.addEventListener('touchstart', () => {
+        wrap.classList.add('tap');
+      }, { passive: true });
+      wrap.addEventListener('touchend', () => {
+        setTimeout(() => wrap.classList.remove('tap'), 400);
+      });
+    }
 
     return wrap;
   }
@@ -402,6 +417,12 @@
         setTimeout(() => node.classList.add('float'), 650);
       }, 160 * i + 120);
     });
+
+    // don't keep animating an ambient float loop the person can't see —
+    // saves battery when the tab is backgrounded on a phone
+    document.addEventListener('visibilitychange', () => {
+      collageEl.style.setProperty('--float-state', document.hidden ? 'paused' : 'running');
+    });
   }
 
   /* ---------------------------------------------------------
@@ -431,6 +452,22 @@
     });
 
     animateEntrance(stickerNodes);
+
+    // a light depth cue for mouse users — skipped on touch (no hover/mouse-
+    // move signal to react to anyway, and it's one less thing to paint on
+    // a phone) and skipped for anyone who's asked for reduced motion
+    if (!isCoarsePointer && !prefersReducedMotion){
+      const blobs = collageEl.querySelectorAll('.blob');
+      collageEl.addEventListener('mousemove', e => {
+        const r = collageEl.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5;
+        const py = (e.clientY - r.top) / r.height - 0.5;
+        blobs.forEach((b, i) => {
+          const depth = (i + 1) * 6;
+          b.style.transform = `translate(${px * depth}px, ${py * depth}px)`;
+        });
+      });
+    }
   }
 
   init();
